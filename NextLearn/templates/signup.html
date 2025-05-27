@@ -1,0 +1,30 @@
+{% extends 'index.html' %}
+{% block content %}
+{% block title %}Register{% endblock title %}
+
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="mb-3 mt-3">
+      <label for="username" class="form-label">Username:</label>
+      <input type="text" class="form-control" id="username" placeholder="Enter username" name="uname">
+    </div>
+    <div class="mb-3">
+      <label for="pwd" class="form-label">Password:</label>
+      <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pswd">
+    </div>
+    <div class="mb-3">
+        <label for="firstname" class="form-label">firstname</label>
+        <input type="text" class="form-control" id="firstname" placeholder="Enter firstname" name="fname">
+    </div>
+    <div class="mb-3">
+        <label for="lastname" class="form-label">Lastname</label>
+        <input type="text" class="form-control" id="Lastname" placeholder="Enter Lastname" name="lname">
+    </div>  
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+    </div> 
+    
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}
