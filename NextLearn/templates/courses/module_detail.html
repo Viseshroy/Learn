@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+{% block content %}
+<h2>{{ module.title }}</h2>
+
+
+{% for content in module.content_set.all %}
+
+  <div>
+    <h3>{{ content.title }}</h3>
+    {% if content.video_url %}
+      {% with content.video_url|cut:'watch?v='|add:'embed/' as embed_url %}
+    <iframe width="560" height="315" src="{{ embed_url }}" frameborder="0" allowfullscreen></iframe>
+      {% endwith %}
+    {% endif %}
+
+    {% if content.notes %}
+      <p>{{ content.notes }}</p>
+    {% endif %}
+  </div>
+{% endfor %}
+{% endblock %}
