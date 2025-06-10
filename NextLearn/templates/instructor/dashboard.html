@@ -1,0 +1,36 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Instructor Dashboard</h2>
+  <p>Welcome, <strong>{{ user.username }}</strong>!</p>
+
+  <h4>Your Courses:</h4>
+  <ul class="list-group mb-4">
+    {% for course in courses %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ course.title }}</strong><br>
+          <a href="{% url 'course_detail' course.pk %}">View Course</a>
+        </div>
+        <div>
+          <a href="{% url 'review_submissions' course.pk %}" class="btn btn-sm btn-primary me-2">Review Submissions</a>
+          <a href="{% url 'manage_course_details' course.pk %}" class="btn btn-sm btn-secondary">Manage</a>
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">No courses created yet.</li>
+    {% endfor %}
+  </ul>
+
+  <h4>Your Students:</h4>
+  <ul class="list-group">
+    {% for student in students %}
+      <li class="list-group-item">
+        {{ student.username }} ({{ student.email }})
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">No students enrolled yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

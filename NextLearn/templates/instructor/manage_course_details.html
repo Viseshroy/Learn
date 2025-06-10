@@ -1,0 +1,36 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Manage Course: {{ course.title }}</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h4>Modules & Contents</h4>
+    {{ module_formset.management_form }}
+    {% for module_form, content_formset in module_content_pairs %}
+      <fieldset class="border p-3 mb-4">
+        <legend>Module</legend>
+        {{ module_form.as_p }}
+
+        <h5>Contents</h5>
+        {{ content_formset.management_form }}
+        {% for content_form in content_formset %}
+          <div class="mb-2">
+            {{ content_form.as_p }}
+          </div>
+        {% endfor %}
+      </fieldset>
+    {% endfor %}
+
+    <h4>Assignments</h4>
+    {{ assignment_formset.management_form }}
+    {% for assignment_form in assignment_formset %}
+      <div class="mb-3">
+        {{ assignment_form.as_p }}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-success mt-3">Save All</button>
+  </form>
+</div>
+{% endblock %}

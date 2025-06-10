@@ -1,7 +1,7 @@
 {% extends 'index.html' %}
-{% block content %}
-{% block title %}Register{% endblock title %}
 
+{% block title %}Register{% endblock title %}
+{% block content %}
 <form action="" method="post">
     {% csrf_token %}
     <div class="mb-3 mt-3">
@@ -24,7 +24,16 @@
         <label for="email" class="form-label">Email</label>
         <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
     </div> 
+    <div class="mb-3">
+      <label for="role" class="form-label">Register as:</label>
+      <select class="form-select" id="role" name="role" required>
+        <option value="" selected disabled>Select role</option>
+        <option value="student">Student</option>
+        <option value="instructor">Instructor</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
     
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Submit</button><br><br>
 </form>
 {% endblock %}

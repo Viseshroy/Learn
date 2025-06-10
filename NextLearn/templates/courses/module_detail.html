@@ -2,20 +2,25 @@
 {% block content %}
 <h2>{{ module.title }}</h2>
 
-
-{% for content in module.content_set.all %}
-
+{% for content in contents %}
   <div>
     <h3>{{ content.title }}</h3>
+
     {% if content.video_url %}
       {% with content.video_url|cut:'watch?v='|add:'embed/' as embed_url %}
-    <iframe width="560" height="315" src="{{ embed_url }}" frameborder="0" allowfullscreen></iframe>
+        <iframe width="560" height="315" src="{{ embed_url }}" frameborder="0" allowfullscreen></iframe>
       {% endwith %}
     {% endif %}
 
     {% if content.notes %}
       <p>{{ content.notes }}</p>
     {% endif %}
+
+    {% if content.file %}
+      <p><a href="{{ content.file.url }}" download>Download {{ content.file.name }}</a></p>
+    {% endif %}
   </div>
+{% empty %}
+  <p>No content available.</p>
 {% endfor %}
 {% endblock %}

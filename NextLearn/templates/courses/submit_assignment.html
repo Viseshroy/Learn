@@ -1,6 +1,10 @@
 {% extends 'index.html' %}
+
 {% block content %}
 <h2>Submit Assignment: {{ assignment.title }}</h2>
+
+<p><strong>Description:</strong> {{ assignment.description }}</p>
+<p><strong>Due Date:</strong> {{ assignment.due_date|date:"D, M d, Y H:i" }}</p>
 
 <form method="post" enctype="multipart/form-data">
   {% csrf_token %}

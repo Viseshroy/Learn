@@ -1,46 +1,54 @@
 <!DOCTYPE html>
 {% load static %}
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </head>
-    <body style="background-image: url('your-image.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;">
->    <style>
-  .blue-100 { background-color: #c57fc2; } /* Lightest */
-  .blue-300 { background-color: #9fa2a5; }
-  .blue-500 { background-color: #91acc7; } /* Medium */
-  .blue-700 { background-color: #5b60a54f; } /* Darker */
-  
-</style>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Learning App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+        .course-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
 
-<body class="blue-500 text-white p-3">
-  
-</body>
+        .course-card:hover {
+            transform: scale(1.02);
+        }
 
-        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        .course-card img {
+            height: 160px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .course-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+            <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
             <div class="container-fluid">
-              <a class="navbar-brand" href="#">HOME</a>
+            
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
                 <span class="navbar-toggler-icon"></span>
               </button>
               
               <div class="collapse navbar-collapse" id="mynavbar">
                 <ul class="navbar-nav me-auto">
-                  {% if user.is_authenticated %}
+                  
                   <li class="nav-item">
                     <a class="nav-link" href="{% url 'home' %}">HOME</a>
                   </li>
-                  
-                  
-                  
-                  
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'admin:index' %}">ADMIN</a>
+                  </li>
+                  {% if user.is_authenticated %}
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">USER</a>
                     <ul class="dropdown-menu">
@@ -55,32 +63,127 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'signin' %}">SIGNIN</a>
                     </li>
-                    
-                    
-                  
                     {% endif %}
                       
-                    </ul>
                 </ul>
                 
               </div>
             </div>
           </nav>
-          
-          <div class="container-fluid mt-3 bg-warning p-3 text-center" >
-            <h1 class="custom-font text-danger">NextLearn</h1>
-            <p class="fw-semibold">Learn What's Next</p> 
-          </div><br><br>
-          <div class="container mt-5">
-            {% block content %}
-            {% endblock %}
+
+    <header class="bg-light py-5 text-center">
+        <div class="container">
+            <h1 class="display-4">NextLearn</h1>
+            <p class="lead">Learn What's Next</p>
         </div>
+    </header>
+    <div class="container mt-5">
+        {% block content %}
         
-          
-          
-          
-        
-        <script src="" async defer></script>
-    
-    </body>
+    </div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 1 %}">
+                    <img src="{% static 'img/python.jpg' %}" alt="Python">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">Python for Beginners</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 2 %}">
+                    <img src="{% static 'img/Data Science.jpg' %}" alt="Data Science">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">Intro to Data Science</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 3 %}">
+                    <img src="{% static 'img/Software Testing.jpg' %}" alt="Software Testing">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">Software Testing and Automation</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 4 %}">
+                    <img src="{% static 'img/Full stack.jpg' %}" alt="Web Development">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">Full Stack Web Development</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 5 %}">
+                    <img src="{% static 'img/JAVA.jpg' %}" alt="CORE JAVA">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">Core JAVA Programming</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 6 %}">
+                    <img src="{% static 'img/Android Development.jpg' %}" alt="Android Development">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">Android Development</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 7 %}">
+                    <img src="{% static 'img/PHP.jpg' %}" alt="PHP">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">PHP for Beginners</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 8 %}">
+                    <img src="{% static 'img/AI.jpg' %}" alt="AI">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">Artificial Intelligence</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card course-card">
+                <a href="{% url 'course_detail' 9 %}">
+                    <img src="{% static 'img/English.jpg' %}" alt="English">
+                </a>
+                <div class="card-body">
+                    <div class="course-title">English- Beginner</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+    <footer class="bg-dark text-white py-4 text-center">
+        <p>&copy; 2025 NextLearn. All rights reserved.</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
 </html>
+

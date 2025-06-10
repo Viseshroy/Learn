@@ -1,0 +1,13 @@
+{% extends 'index.html' %}
+{% block content %}
+<h2>Grade Submission</h2>
+<p>Student: {{ submission.student.username }}</p>
+<p>Assignment: {{ submission.assignment.title }}</p>
+<p><a href="{{ submission.file.url }}">Download File</a></p>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Submit Grade</button>
+</form>
+{% endblock %}

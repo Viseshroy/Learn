@@ -12,6 +12,13 @@ urlpatterns=[
     path('courses/<int:pk>/', views.course_detail, name='course_detail'),
     path('module/<int:pk>/', views.module_detail, name='module_detail'),
     path('assignment/<int:assignment_id>/submit/', views.submit_assignment, name='submit_assignment'),
+    path('instructor/dashboard/', views.instructor_dashboard, name='instructor_dashboard'),
+    path('instructor/course/<int:course_id>/manage/', views.manage_course_details, name='manage_course_details'),
+    path('instructor/course/<int:course_id>/submissions/', views.review_submissions, name='review_submissions'),
+    path('instructor/submissions/<int:submission_id>/grade/', views.grade_submission, name='grade_submission'),
+    
+
+
 ]
 
 
