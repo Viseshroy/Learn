@@ -1,13 +1,34 @@
 {% extends 'index.html' %}
-{% block content %}
-<h2>Grade Submission</h2>
-<p>Student: {{ submission.student.username }}</p>
-<p>Assignment: {{ submission.assignment.title }}</p>
-<p><a href="{{ submission.file.url }}">Download File</a></p>
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Submit Grade</button>
-</form>
+{% block content %}
+<div class="container mt-5">
+  <h2>Grade Submission</h2>
+
+  <div class="card mt-4">
+    <div class="card-body">
+      <h5 class="card-title">Student: <strong>{{ submission.student.username }}</strong></h5>
+      <p class="card-text">Assignment: <strong>{{ submission.assignment.title }}</strong></p>
+      <p class="card-text">
+        File: 
+        <a href="{{ submission.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+          View Submission
+        </a>
+      </p>
+
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ form.grade.label_tag }} 
+          {{ form.grade }}
+          {% if form.grade.errors %}
+            <div class="text-danger small">{{ form.grade.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-success">Submit Grade</button>
+        <a href="{% url 'review_submissions' submission.assignment.course.id %}" class="btn btn-secondary ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -45,9 +45,21 @@
                   <li class="nav-item">
                     <a class="nav-link" href="{% url 'home' %}">HOME</a>
                   </li>
+                    {% if user.is_authenticated and user.userprofile.role == 'student' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'course_list' %}">LEARN</a>
+                    </li>
+                    {% elif user.is_authenticated and user.userprofile.role == 'instructor' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'instructor_dashboard' %}">Dashboard</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
                   <li class="nav-item">
                     <a class="nav-link" href="{% url 'admin:index' %}">ADMIN</a>
                   </li>
+            
                   {% if user.is_authenticated %}
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">USER</a>
@@ -85,7 +97,7 @@
     <div class="row">
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 1 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/python.jpg' %}" alt="Python">
                 </a>
                 <div class="card-body">
@@ -95,7 +107,7 @@
         </div>
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 2 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/Data Science.jpg' %}" alt="Data Science">
                 </a>
                 <div class="card-body">
@@ -105,7 +117,7 @@
         </div>
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 3 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/Software Testing.jpg' %}" alt="Software Testing">
                 </a>
                 <div class="card-body">
@@ -116,7 +128,7 @@
 
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 4 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/Full stack.jpg' %}" alt="Web Development">
                 </a>
                 <div class="card-body">
@@ -126,7 +138,7 @@
         </div>
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 5 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/JAVA.jpg' %}" alt="CORE JAVA">
                 </a>
                 <div class="card-body">
@@ -136,7 +148,7 @@
         </div>
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 6 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/Android Development.jpg' %}" alt="Android Development">
                 </a>
                 <div class="card-body">
@@ -147,7 +159,7 @@
 
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 7 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/PHP.jpg' %}" alt="PHP">
                 </a>
                 <div class="card-body">
@@ -157,7 +169,7 @@
         </div>
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 8 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/AI.jpg' %}" alt="AI">
                 </a>
                 <div class="card-body">
@@ -167,7 +179,7 @@
         </div>
         <div class="col-md-4 mb-4">
             <div class="card course-card">
-                <a href="{% url 'course_detail' 9 %}">
+                <a href="{% url 'signup' %}">
                     <img src="{% static 'img/English.jpg' %}" alt="English">
                 </a>
                 <div class="card-body">

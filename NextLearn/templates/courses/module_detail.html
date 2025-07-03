@@ -1,26 +1,106 @@
 {% extends 'index.html' %}
+{% load youtube_filters %}
+{% load static %}
+
 {% block content %}
-<h2>{{ module.title }}</h2>
+<style>
+    .accordion-button::after {
+        display: none; /* remove Bootstrap default icon */
+    }
+    .accordion-button .toggle-icon {
+        margin-right: 10px;
+        font-size: 1.2rem;
+        transition: transform 0.2s;
+    }
+    .accordion-button[aria-expanded="true"] .toggle-icon {
+        transform: rotate(90deg); /* ▼ becomes ▶ */
+    }
+    .accordion-body {
+        background-color: #f8f9fa;
+        border-radius: 0 0 10px 10px;
+        padding: 20px;
+    }
+    .mark-complete {
+        margin-top: 15px;
+    }
+</style>
 
-{% for content in contents %}
-  <div>
-    <h3>{{ content.title }}</h3>
+<div class="container my-5">
+    <h2 class="mb-4 text-primary text-center">{{ module.title }}</h2>
 
-    {% if content.video_url %}
-      {% with content.video_url|cut:'watch?v='|add:'embed/' as embed_url %}
-        <iframe width="560" height="315" src="{{ embed_url }}" frameborder="0" allowfullscreen></iframe>
-      {% endwith %}
+    {% if contents %}
+    <div class="accordion" id="moduleAccordion">
+        {% for content in contents %}
+        <div class="accordion-item mb-3">
+            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                    <span class="toggle-icon">▶</span> {{ content.title }}
+                </button>
+            </h2>
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#moduleAccordion">
+                <div class="accordion-body">
+
+                    {% if content.video_url %}
+                    <div class="ratio ratio-16x9 mb-3">
+                        <iframe 
+                            src="{{ content.video_url|youtube_embed }}" 
+                            frameborder="0" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    {% endif %}
+
+
+                    {% if content.notes %}
+                    <div class="mb-3">
+                        <h6 class="text-muted">Notes:</h6>
+                        <p>{{ content.notes }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if content.file %}
+                    <div class="mb-3">
+                        <a class="btn btn-outline-primary" href="{{ content.file.url }}" download>
+                            📥 Download {{ content.file.name|slice:"15:" }}
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- ✅ Mark as Complete -->
+                    <div class="mark-complete">
+                        <button class="btn btn-success btn-sm complete-btn" data-content-id="{{ content.id }}">
+                            ✅ Mark as Complete
+                        </button>
+                        <span class="text-success ms-2 d-none complete-msg">Marked!</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <p class="text-muted text-center">No content available for this module.</p>
     {% endif %}
+</div>
 
-    {% if content.notes %}
-      <p>{{ content.notes }}</p>
-    {% endif %}
+<!-- ✅ JavaScript for toggling icons and Mark as Complete -->
+<script>
+    document.querySelectorAll('.accordion-button').forEach(btn => {
+        btn.addEventListener('click', function () {
+            // Toggle icon manually
+            let icon = this.querySelector('.toggle-icon');
+            let isExpanded = this.getAttribute('aria-expanded') === 'true';
+            icon.textContent = isExpanded ? '▶' : '▼';
+        });
+    });
 
-    {% if content.file %}
-      <p><a href="{{ content.file.url }}" download>Download {{ content.file.name }}</a></p>
-    {% endif %}
-  </div>
-{% empty %}
-  <p>No content available.</p>
-{% endfor %}
+    document.querySelectorAll('.complete-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            this.classList.add('disabled');
+            this.nextElementSibling.classList.remove('d-none');
+            // Optional: send completion info to backend via fetch()
+        });
+    });
+</script>
 {% endblock %}

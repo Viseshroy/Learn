@@ -4,31 +4,27 @@ from django.forms import inlineformset_factory
 from .models import Course, Module, Content, Assignment
 from .models import UserProfile
 from .models import Submission
+from django.utils import timezone
 import datetime
 
 class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     role = forms.ChoiceField(choices=UserProfile.ROLE_CHOICES)
+    selected_course = forms.ModelChoiceField(
+        queryset=Course.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}))
 
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'role']
 
 
-# class CourseForm(forms.ModelForm):
-#     class Meta:
-#         model = Course
-#         fields = ['title', 'description', 'category']  # instructor is set in view
-#         widgets = {
-#             'title': forms.TextInput(attrs={'class': 'form-control'}),
-#             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-#             'category': forms.Select(attrs={'class': 'form-select'}),
-#         }
-#         labels = {
-#             'title': 'Course Title',
-#             'description': 'Course Description',
-#             'category': 'Course Category',
-#         }
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['title', 'description', 'category', 'price']  # ✅ include price
+
 
 class ModuleForm(forms.ModelForm):
     class Meta:
@@ -67,9 +63,10 @@ class AssignmentForm(forms.ModelForm):
 
     def clean_due_date(self):
         due_date = self.cleaned_data.get('due_date')
-        if due_date < datetime.datetime.now():
+        if due_date and due_date < timezone.now():
             raise forms.ValidationError("Due date must be in the future.")
-        return due_date       
+        return due_date
+      
 
 class SubmissionForm(forms.ModelForm):
     class Meta:

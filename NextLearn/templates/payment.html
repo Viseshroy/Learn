@@ -1,0 +1,17 @@
+{% extends 'index.html' %}
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-3">Complete Payment</h2>
+    <p>Course: <strong>{{ profile.selected_course.title }}</strong></p>
+    <p>Instructor: {{ profile.selected_course.instructor.get_full_name }}</p>
+    <p>Amount: ₹{{ profile.selected_course.price }}</p>
+
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Pay Now</button>
+    </form><br>
+</div>
+{% endblock %}

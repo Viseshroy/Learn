@@ -3,12 +3,19 @@
 {% block content %}
 <h2>Submit Assignment: {{ assignment.title }}</h2>
 
-<p><strong>Description:</strong> {{ assignment.description }}</p>
-<p><strong>Due Date:</strong> {{ assignment.due_date|date:"D, M d, Y H:i" }}</p>
+{% if submitted %}
+  <div class="alert alert-success">
+    ✅ Assignment submitted!
+  </div>
+  <p><strong>Submitted File:</strong> 
+    <a href="{{ submission.file.url }}" target="_blank">View</a>
+  </p>
+{% else %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+{% endif %}
 
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Submit</button>
-</form>
 {% endblock %}

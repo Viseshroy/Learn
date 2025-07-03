@@ -16,6 +16,7 @@ urlpatterns=[
     path('instructor/course/<int:course_id>/manage/', views.manage_course_details, name='manage_course_details'),
     path('instructor/course/<int:course_id>/submissions/', views.review_submissions, name='review_submissions'),
     path('instructor/submissions/<int:submission_id>/grade/', views.grade_submission, name='grade_submission'),
+    path('payment/<int:user_id>/', views.payment_page, name='payment_page'),
     
 
 

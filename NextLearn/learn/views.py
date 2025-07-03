@@ -1,14 +1,17 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.models import User
+from django.contrib import messages
 from learn.models import Course, Module, Content, Assignment, Submission
 from learn.form import SubmissionForm,GradeForm
 from .form import ModuleFormSet, AssignmentFormSet,ContentFormSet
+from django.views.decorators.csrf import csrf_exempt
 from django.forms import modelformset_factory
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile,Enrollment
 from django.contrib.auth.models import Group
+from django.db import transaction
 
 # Create your views here.
 def home(request):
@@ -34,7 +37,8 @@ def instructor_dashboard(request):
 
 @login_required
 def manage_course_details(request, course_id):
-    if request.user.userprofile.role != 'instructor':
+    # Ensure only instructors can access
+    if not hasattr(request.user, 'userprofile') or request.user.userprofile.role != 'instructor':
         return HttpResponse("Unauthorized", status=403)
 
     course = get_object_or_404(Course, id=course_id, instructor=request.user)
@@ -43,48 +47,64 @@ def manage_course_details(request, course_id):
         module_formset = ModuleFormSet(request.POST, instance=course)
         assignment_formset = AssignmentFormSet(request.POST, instance=course)
 
+        # Validate both module and assignment formsets
         if module_formset.is_valid() and assignment_formset.is_valid():
-            modules = module_formset.save()
-
             content_formsets = []
             all_content_valid = True
 
-            for i, module in enumerate(modules):
+            # Use module_formset.forms to preserve order
+            for i, module_form in enumerate(module_formset.forms):
+                module = module_form.instance
                 prefix = f'content_formset_{i}'
-                content_formset = ContentFormSet(request.POST, request.FILES, instance=module, prefix=prefix)
-                content_formsets.append((module, content_formset))  # Pair for template
+                content_formset = ContentFormSet(
+                    request.POST, request.FILES, instance=module, prefix=prefix
+                )
+                content_formsets.append((module, content_formset))
+
                 if not content_formset.is_valid():
                     all_content_valid = False
 
             if all_content_valid:
-                for _, content_formset in content_formsets:
-                    content_formset.save()
-                
-                assignment_formset.save()
-                return redirect('instructor_dashboard')
+                with transaction.atomic():
+                    module_formset.save()
+                    assignment_formset.save()
+                    for _, content_formset in content_formsets:
+                        content_formset.save()
 
+                return redirect('instructor_dashboard')
             else:
-                # Pair with corresponding module form
+                # Render forms again with errors
                 module_content_pairs = list(zip(module_formset.forms, [fs for _, fs in content_formsets]))
         else:
-            module_content_pairs = list(zip(module_formset.forms, [ContentFormSet(prefix=f'content_formset_{i}') for i in range(len(module_formset.forms))]))
+            # Fallback content formsets if main formsets are invalid
+            module_content_pairs = []
+            for i, module_form in enumerate(module_formset.forms):
+                content_formset = ContentFormSet(
+                    request.POST, request.FILES,
+                    instance=module_form.instance,
+                    prefix=f'content_formset_{i}'
+                )
+                module_content_pairs.append((module_form, content_formset))
+
     else:
+        # GET request: initialize empty formsets with instances
         module_formset = ModuleFormSet(instance=course)
         assignment_formset = AssignmentFormSet(instance=course)
 
         module_content_pairs = []
         for i, module_form in enumerate(module_formset.forms):
-            content_formset = ContentFormSet(instance=module_form.instance, prefix=f'content_formset_{i}')
+            content_formset = ContentFormSet(
+                instance=module_form.instance,
+                prefix=f'content_formset_{i}'
+            )
             module_content_pairs.append((module_form, content_formset))
 
     return render(request, 'instructor/manage_course_details.html', {
         'course': course,
         'module_formset': module_formset,
         'assignment_formset': assignment_formset,
-        'module_content_pairs': module_content_pairs,  # Clean zipped data for template
+        'module_content_pairs': module_content_pairs,
     })
-
-
 
 
 @login_required
@@ -99,7 +119,17 @@ def course_detail(request, pk):
     course = get_object_or_404(Course, pk=pk)
 
     # Check if the user is enrolled
-    if not Enrollment.objects.filter(student=request.user, course=course).exists() and course.instructor != request.user:
+    is_enrolled = Enrollment.objects.filter(student=request.user, course=course).exists()
+
+    # Allow access if the user is the instructor
+    if course.instructor == request.user:
+        pass  # Instructor always has access
+
+    # Allow access if student is enrolled AND has paid
+    elif is_enrolled:
+        if hasattr(request.user, 'userprofile') and not request.user.userprofile.payment_done:
+            return HttpResponse("Please complete your payment to access this course.", status=403)
+    else:
         return HttpResponse("You are not enrolled in this course.", status=403)
 
     modules = course.module_set.all()
@@ -109,6 +139,7 @@ def course_detail(request, pk):
         'modules': modules,
         'assignments': assignments
     })
+
 
 @login_required
 def module_detail(request, pk):
@@ -124,9 +155,20 @@ def module_detail(request, pk):
     })
 
 
+
+
 @login_required
 def submit_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, pk=assignment_id)
+    existing_submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
+
+    if existing_submission:
+        # Don't show form again
+        return render(request, 'courses/submit_assignment.html', {
+            'assignment': assignment,
+            'submitted': True,
+            'submission': existing_submission
+        })
 
     if request.method == 'POST':
         form = SubmissionForm(request.POST, request.FILES)
@@ -135,14 +177,17 @@ def submit_assignment(request, assignment_id):
             submission.assignment = assignment
             submission.student = request.user
             submission.save()
-            return redirect('course_detail', pk=assignment.course.pk)
+            messages.success(request, "Assignment submitted successfully!")
+            return redirect('submit_assignment', assignment_id=assignment.id)
     else:
         form = SubmissionForm()
 
     return render(request, 'courses/submit_assignment.html', {
         'assignment': assignment,
-        'form': form
+        'form': form,
+        'submitted': False
     })
+
 @login_required
 def review_submissions(request, course_id):
     if request.user.userprofile.role != 'instructor':
@@ -152,29 +197,32 @@ def review_submissions(request, course_id):
     submissions = Submission.objects.filter(assignment__course=course)
 
     return render(request, 'instructor/review_submissions.html', {
-        'submissions': submissions
+        'submissions': submissions,
+        'course': course,
     })
 
 @login_required
 def grade_submission(request, submission_id):
     submission = get_object_or_404(Submission, pk=submission_id)
 
-    if request.user.userprofile.role != 'instructor':
+    # Ensure the instructor owns this course
+    if request.user.userprofile.role != 'instructor' or \
+       submission.assignment.course.instructor != request.user:
         return HttpResponse("Unauthorized", status=403)
 
     if request.method == 'POST':
         form = GradeForm(request.POST, instance=submission)
         if form.is_valid():
             form.save()
+            messages.success(request, "Grade submitted successfully.")
             return redirect('review_submissions', course_id=submission.assignment.course.pk)
     else:
         form = GradeForm(instance=submission)
 
     return render(request, 'instructor/grade_submission.html', {
         'submission': submission,
-        'form': form
+        'form': form,
     })
-
 
 
 def signup(request):
@@ -184,22 +232,54 @@ def signup(request):
         firstname = request.POST['fname']
         lastname = request.POST['lname']
         email = request.POST['email']
-        role = request.POST['role']
+        role = request.POST['role'].lower()
+        selected_course_id = request.POST.get('selected_course')
 
         myuser = User.objects.create_user(username=username, password=password, email=email)
         myuser.first_name = firstname
         myuser.last_name = lastname
         myuser.save()
 
-        UserProfile.objects.create(user=myuser, role=role)
+        if role == 'student' and selected_course_id:
+            selected_course = Course.objects.get(id=selected_course_id)
+            profile = UserProfile.objects.create(user=myuser, role=role, selected_course=selected_course, payment_done=False)
+            # Optionally enroll immediately
+            Enrollment.objects.get_or_create(student=myuser, course=selected_course)
+        else:
+            profile = UserProfile.objects.create(user=myuser, role=role)
+
         if role == 'instructor':
-            instructor_group = Group.objects.get(name='Instructor')  # Make sure this exists
+            instructor_group = Group.objects.get(name='instructor')  # Make sure this exists
             myuser.groups.add(instructor_group)
 
-        return redirect('signin')
+        elif role == 'student':
+            student_group = Group.objects.get(name='student')
+            myuser.groups.add(student_group)  
+        if role == 'student':
+            return redirect('payment_page', user_id=myuser.id)
+        else:
+            return redirect('signin')
+    
+    courses = Course.objects.all()
+    return render(request, 'signup.html', {'courses': courses})
 
-    return render(request, 'signup.html')
+@csrf_exempt
+def payment_page(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(UserProfile, user=user)
 
+    if request.method == 'POST':
+        # Simulate payment success
+        profile.payment_done = True
+        profile.save()
+
+        # Auto-enroll student to selected course
+        if profile.selected_course:
+            Enrollment.objects.get_or_create(student=user, course=profile.selected_course)
+
+        return redirect('signin')  # Or redirect to dashboard if you prefer
+
+    return render(request, 'payment.html', {'profile': profile})
 
 
 def signin(request):

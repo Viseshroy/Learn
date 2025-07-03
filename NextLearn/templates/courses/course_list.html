@@ -1,12 +1,19 @@
 {% extends 'index.html' %}
+
 {% block content %}
-<h2>My Courses</h2>
-<ul>
-  {% for course in courses %}
-    <li>
-      <a href="{% url 'course_detail' course.id %}">{{ course.title }}</a>
-      <p>{{ course.description|truncatewords:20 }}</p>
-    </li>
-  {% endfor %}
-</ul>
+<div class="container mt-4">
+  <h2 class="mb-4">My Courses</h2>
+  <ul class="list-group">
+    {% for course in courses %}
+      <li class="list-group-item">
+        <h5>
+          <a href="{% url 'course_detail' course.id %}">{{ course.title }}</a>
+        </h5>
+        <p class="text-muted">{{ course.description|truncatewords:20 }}</p>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No courses available.</li>
+    {% endfor %}
+  </ul>
+</div>
 {% endblock %}
